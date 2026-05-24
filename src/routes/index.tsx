@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { DEFAULT_CONTENT, loadContent, type SiteContent } from "@/lib/site-content";
+import { DEFAULT_CONTENT, loadContent, type SiteContent, submitBooking } from "@/lib/site-content";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,11 +46,36 @@ function Home() {
     if (!form.eventType) return setError("Please select an event type");
     if (!form.guestCount) return setError("Please select guest count");
     if (!form.budget) return setError("Please select your budget");
+    
     setError("");
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
-    setSubmitted(true);
+    
+    try {
+      // Submit booking with email and WhatsApp
+      await submitBooking(
+        {
+          name: form.name,
+          phone: form.phone,
+          eventType: form.eventType,
+          guestCount: form.guestCount,
+          budget: form.budget,
+          date: form.date,
+        },
+        content.social.email,
+        content.social.whatsapp
+      );
+      
+      setSubmitting(false);
+      setSubmitted(true);
+      // Reset form after 5 seconds
+      setTimeout(() => {
+        setSubmitted(false);
+        setForm({ name: "", phone: "", eventType: "", guestCount: "", budget: "", date: "" });
+      }, 5000);
+    } catch (err: any) {
+      setSubmitting(false);
+      setError(err?.message || "Failed to submit. Please try again or contact directly.");
+    }
   };
 
   const filteredGallery = filter === "all" ? content.gallery : content.gallery.filter((g) => g.cat === filter);
@@ -80,7 +105,7 @@ function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={() => scrollTo(bookingRef)} className="hidden md:inline-flex px-5 py-2.5 rounded-full text-[13px] font-medium text-primary-foreground transition-transform hover:scale-105" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-brand)" }}>
+            <button onClick={() => scrollTo(bookingRef)} className="hidden md:inline-flex px-5 py-2.5 rounded-full text-[13px] font-medium text-primary-foreground transition-transform hover:scale-[...]
               Get In Touch
             </button>
             <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden flex flex-col gap-1.5 p-2" aria-label="Menu">
@@ -118,7 +143,7 @@ function Home() {
             </h1>
             <p className="text-lg text-ink-soft max-w-xl mb-10 leading-relaxed">{content.hero.description}</p>
             <div className="flex flex-wrap gap-4 mb-12">
-              <button onClick={() => scrollTo(bookingRef)} className="px-7 py-4 rounded-full text-primary-foreground font-medium tracking-wide transition-transform hover:scale-105" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-brand)" }}>
+              <button onClick={() => scrollTo(bookingRef)} className="px-7 py-4 rounded-full text-primary-foreground font-medium tracking-wide transition-transform hover:scale-105" style={{ backg[...]
                 {content.hero.ctaPrimary}
               </button>
               <button onClick={() => scrollTo(galleryRef)} className="px-7 py-4 rounded-full border-2 border-ink/15 font-medium hover:border-primary hover:text-primary transition-colors">
@@ -165,9 +190,9 @@ function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {content.packages.map((p, idx) => (
-              <div key={idx} className={`relative rounded-3xl p-8 border transition-transform hover:-translate-y-1 ${p.featured ? "bg-card border-primary/30" : "bg-card border-border"}`} style={p.featured ? { boxShadow: "var(--shadow-brand)" } : {}}>
+              <div key={idx} className={`relative rounded-3xl p-8 border transition-transform hover:-translate-y-1 ${p.featured ? "bg-card border-primary/30" : "bg-card border-border"}`} style={p[...]
                 {p.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-semibold text-primary-foreground tracking-wide" style={{ background: "var(--gradient-brand)" }}>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-semibold text-primary-foreground tracking-wide" style={{ background: "var(--gra[...]
                     ⭐ {p.badge}
                   </div>
                 )}
@@ -182,7 +207,7 @@ function Home() {
                     <li key={f} className="flex gap-3 text-sm"><span className="text-primary mt-0.5">✓</span> {f}</li>
                   ))}
                 </ul>
-                <button onClick={() => scrollTo(bookingRef)} className={`w-full py-3.5 rounded-full font-medium text-sm transition-all ${p.featured ? "text-primary-foreground hover:scale-105" : "border-2 border-ink/15 hover:border-primary hover:text-primary"}`} style={p.featured ? { background: "var(--gradient-brand)" } : {}}>
+                <button onClick={() => scrollTo(bookingRef)} className={`w-full py-3.5 rounded-full font-medium text-sm transition-all ${p.featured ? "text-primary-foreground hover:scale-105" : "[...]
                   Book This Package
                 </button>
               </div>
@@ -200,7 +225,7 @@ function Home() {
           </div>
           <div className="flex flex-wrap justify-center gap-2 mb-12">
             {cats.map((c) => (
-              <button key={c.v} onClick={() => setFilter(c.v)} className={`px-5 py-2.5 rounded-full text-[13px] font-medium transition-all ${filter === c.v ? "text-primary-foreground" : "bg-transparent text-ink-soft border hover:border-primary hover:text-primary"}`} style={filter === c.v ? { background: "var(--gradient-brand)" } : {}}>
+              <button key={c.v} onClick={() => setFilter(c.v)} className={`px-5 py-2.5 rounded-full text-[13px] font-medium transition-all ${filter === c.v ? "text-primary-foreground" : "bg-trans[...]
                 {c.l}
               </button>
             ))}
@@ -264,7 +289,7 @@ function Home() {
             <div className="bg-white/5 border border-white/10 rounded-3xl p-12 text-center text-white backdrop-blur">
               <div className="text-6xl mb-4">✨</div>
               <h3 className="text-3xl font-display mb-3" style={{ fontFamily: "var(--font-display)" }}>Thank you, {form.name.split(" ")[0]}!</h3>
-              <p className="text-white/70">We've received your request. A planner will reach out within 2 hours.</p>
+              <p className="text-white/70">We've received your request. A planner will reach out via WhatsApp and Email within 2 hours.</p>
             </div>
           ) : (
             <form onSubmit={submit} className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-10 backdrop-blur space-y-5">
@@ -274,14 +299,14 @@ function Home() {
                 <Field label="Phone / WhatsApp *" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+254 700 000 000" type="tel" />
               </div>
               <div className="grid md:grid-cols-2 gap-5">
-                <Select label="Event Type *" value={form.eventType} onChange={(v) => setForm({ ...form, eventType: v })} options={["Wedding", "Corporate Event", "Birthday Celebration", "Social Event", "Other"]} />
-                <Select label="Guest Count *" value={form.guestCount} onChange={(v) => setForm({ ...form, guestCount: v })} options={["Under 50", "50 – 100", "100 – 200", "200 – 500", "500+"]} />
+                <Select label="Event Type *" value={form.eventType} onChange={(v) => setForm({ ...form, eventType: v })} options={["Wedding", "Corporate Event", "Birthday Celebration", "Social Ev[...]
+                <Select label="Guest Count *" value={form.guestCount} onChange={(v) => setForm({ ...form, guestCount: v })} options={["Under 50", "50 – 100", "100 – 200", "200 – 500", "500+[...]
               </div>
               <div className="grid md:grid-cols-2 gap-5">
-                <Select label="Budget *" value={form.budget} onChange={(v) => setForm({ ...form, budget: v })} options={["Under KES 200,000", "KES 200,000 – 550,000", "KES 550,000 – 1,200,000", "KES 1,200,000+", "Let's discuss"]} />
+                <Select label="Budget *" value={form.budget} onChange={(v) => setForm({ ...form, budget: v })} options={["Under KES 200,000", "KES 200,000 – 550,000", "KES 550,000 – 1,200,000[...]
                 <Field label="Preferred Date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} type="date" />
               </div>
-              <button type="submit" disabled={submitting} className="w-full py-4 rounded-full text-primary-foreground font-medium tracking-wide transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-brand)" }}>
+              <button type="submit" disabled={submitting} className="w-full py-4 rounded-full text-primary-foreground font-medium tracking-wide transition-transform hover:scale-[1.02] disabled:op[...]
                 {submitting ? "Submitting..." : "Check Availability — Free →"}
               </button>
               <p className="text-center text-xs text-white/40">Or call us directly · {content.booking.phoneDisplay}</p>
@@ -320,7 +345,7 @@ function FloatingSocial({ social }: { social: SiteContent["social"] }) {
       label: "WhatsApp",
       bg: "#25D366",
       svg: (
-        <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.339 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 [...]
       ),
     },
     social.email && {
@@ -328,7 +353,7 @@ function FloatingSocial({ social }: { social: SiteContent["social"] }) {
       label: "Email",
       bg: "linear-gradient(135deg, oklch(0.55 0.22 350), oklch(0.65 0.18 340))",
       svg: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1[...]
       ),
     },
     social.instagram && {
@@ -336,7 +361,7 @@ function FloatingSocial({ social }: { social: SiteContent["social"] }) {
       label: "Instagram",
       bg: "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
       svg: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"[...]
       ),
     },
   ].filter(Boolean) as { href: string; label: string; bg: string; svg: React.ReactNode }[];
